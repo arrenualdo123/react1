@@ -12,6 +12,7 @@ import EmojiPicker from '@/components/EmojiPicker';
 import EmojiList from '@/components/EmojiList';
 import EmojiSticker from '@/components/EmojiSticker';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { sendLocalNotification } from '@/hooks/usePushNotifications';
 
 const PlaceholderImage = require('@/assets/images/background-image.png');
 
@@ -65,7 +66,12 @@ export default function Index() {
       
       await MediaLibrary.saveToLibraryAsync(localUri);
       if (localUri) {
-        alert('Saved!');
+        // Enviar notificación local (funciona en Expo Go)
+        await sendLocalNotification(
+          ' Imagen Guardada',
+          'Tu imagen ha sido guardada exitosamente en la galería',
+          { screen: 'home', action: 'save' }
+        );
       }
     } catch (e) {
       console.log(e);

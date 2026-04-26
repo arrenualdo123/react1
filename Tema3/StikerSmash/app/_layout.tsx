@@ -1,9 +1,36 @@
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
-import { View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, Alert } from "react-native";
+import { usePushNotifications, sendLocalNotification } from "../hooks/usePushNotifications";
 
 SplashScreen.preventAutoHideAsync();
+
+function NotificationProvider({ children }: { children: React.ReactNode }) {
+  const { expoPushToken, notification, permissionStatus } = usePushNotifications();
+
+  useEffect(() => {
+    if (notification) {
+      console.log(' Notificación recibida en layout raíz');
+      console.log('Título:', notification.request.content.title);
+      console.log('Cuerpo:', notification.request.content.body);
+    }
+  }, [notification]);
+
+  useEffect(() => {
+    if (expoPushToken) {
+      console.log(' Token de notificaciones listo');
+    }
+  }, [expoPushToken]);
+
+  useEffect(() => {
+    if (permissionStatus !== 'unknown') {
+      console.log(' Estado de permisos:', permissionStatus);
+    }
+  }, [permissionStatus]);
+
+  return <>{children}</>;
+}
 
 export default function RootLayout() {
   const [isReady, setIsReady] = useState(false);
@@ -11,7 +38,6 @@ export default function RootLayout() {
   useEffect(() => {
     async function prepare() {
       try {
-        // Simula carga (puedes quitarlo luego)
         await new Promise(resolve => setTimeout(resolve, 2000));
       } catch (e) {
         console.warn(e);
@@ -43,11 +69,13 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack>
-      <Stack.Screen
-        name="(tabs)"
-        options={{ headerShown: false }}
-      />
-    </Stack>
+    <NotificationProvider>
+      <Stack>
+        <Stack.Screen
+          name="(tabs)"
+          options={{ headerShown: false }}
+        />
+      </Stack>
+    </NotificationProvider>
   );
 }
